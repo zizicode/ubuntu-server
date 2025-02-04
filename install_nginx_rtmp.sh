@@ -1,14 +1,20 @@
 #!/bin/bash
 
-# Actualizar sistema
+# 🔹 Opcional solo para entorno local: Instalar y habilitar SSH
+echo "🔹 Instalando y activando SSH (Opcional solo para local)..."
+sudo apt install -y openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
+# 🔹 Actualizar sistema
 echo "🔹 Actualizando el sistema..."
 sudo apt update && sudo apt upgrade -y
 
-# Instalar dependencias
+# 🔹 Instalar dependencias
 echo "🔹 Instalando dependencias..."
 sudo apt install -y build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev unzip git
 
-# Descargar Nginx y el módulo RTMP
+# 🔹 Descargar Nginx y el módulo RTMP
 echo "🔹 Descargando Nginx y el módulo RTMP..."
 cd /usr/local/src
 sudo git clone https://github.com/arut/nginx-rtmp-module.git
@@ -16,12 +22,12 @@ sudo wget http://nginx.org/download/nginx-1.24.0.tar.gz
 sudo tar -xvzf nginx-1.24.0.tar.gz
 cd nginx-1.24.0
 
-# Configurar, compilar e instalar Nginx con RTMP
+# 🔹 Configurar, compilar e instalar Nginx con RTMP
 echo "🔹 Configurando e instalando Nginx..."
 sudo ./configure --with-http_ssl_module --add-module=../nginx-rtmp-module
 sudo make && sudo make install
 
-# Configurar Nginx para RTMP y HLS
+# 🔹 Configurar Nginx para RTMP y HLS
 echo "🔹 Configurando Nginx con RTMP y HLS..."
 sudo tee /usr/local/nginx/conf/nginx.conf > /dev/null <<EOT
 worker_processes  1;
@@ -59,13 +65,22 @@ http {
 }
 EOT
 
-# Crear carpeta HLS
+# 🔹 Crear carpeta HLS
 echo "🔹 Creando carpeta HLS..."
 sudo mkdir -p /usr/local/nginx/html/hls
 sudo chmod -R 777 /usr/local/nginx/html
 
-# Iniciar Nginx
+# 🔹 Iniciar Nginx
 echo "🔹 Iniciando Nginx..."
 sudo /usr/local/nginx/sbin/nginx
 
-echo "✅ Instalación completada. Nginx está ejecutándose en el puerto 80 y RTMP en el 1935."
+# 🔹 Obtener la IP del servidor
+SERVER_IP=$(hostname -I | awk '{print $1}')
+
+# 🔹 Mostrar información final
+echo "- Instalación completada."
+echo "- IP completada: $SERVER_IP"
+echo "- Accede:"
+echo "- rtmp://$SERVER_IP/live/stream"
+echo "- Reproducir la transmisión en HLS:"
+echo "- http://$SERVER_IP/hls/stream.m3u8"
